@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Stack</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: lightsalmon; /* Background color */
+        }
+
+        .photo-stack {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 90vw; /* Flexible width */
+            max-width: 500px; /* Max width */
+            height: auto;
+        }
+
+        .photo-stack img {
+            position: absolute;
+            width: 200px; /* Base size */
+            height: 200px; /* Base size */
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: grab;
+            z-index: 10;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Add different rotation angles for each image */
+        #photo1 {
+            transform: rotate(40deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo2 {
+            transform: rotate(-10deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo3 {
+            transform: rotate(20deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo4 {
+            transform: rotate(-25deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo5 {
+            transform: rotate(35deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo6 {
+            transform: rotate(-20deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+        #photo7 {
+            transform: rotate(20deg);
+            border: 10px solid lightgoldenrodyellow;
+            border-bottom: 60px solid lightgoldenrodyellow;
+        }
+
+        .dropped-image {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: grab;
+            z-index: 5;
+        }
+
+        /* Media query for smaller screens */
+        @media (max-width: 1024px) {
+            .photo-stack img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .photo-stack img {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .photo-stack img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="photo-stack">
+        <img src="1.jpg" alt="Photo 1" draggable="true" id="photo1">
+        <img src="2.jpg" alt="Photo 2" draggable="true" id="photo2">
+        <img src="3.jpg" alt="Photo 3" draggable="true" id="photo3">
+        <img src="4.jpg" alt="Photo 4" draggable="true" id="photo4">
+        <img src="5.jpg" alt="Photo 5" draggable="true" id="photo5">
+        <img src="6.jpg" alt="Photo 6" draggable="true" id="photo6">
+        <img src="7.jpg" alt="Photo 7" draggable="true" id="photo7">
+    </div>
+
+    <script>
+        // Handle drag start for the images
+        document.querySelectorAll('.photo-stack img').forEach(img => {
+            img.addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData("text/plain", img.id);
+            });
+        });
+
+        // Allow dropping anywhere on the body
+        document.body.addEventListener('dragover', (event) => {
+            event.preventDefault(); // Necessary to allow dropping
+        });
+
+        // Handle drop event
+        document.body.addEventListener('drop', (event) => {
+            event.preventDefault();
+
+            const imgId = event.dataTransfer.getData("text/plain");
+            let targetImg = document.getElementById(imgId) || document.querySelector(`[data-id='${imgId}']`);
+
+            // If the target image already exists on the body (dropped-image), reuse it
+            if (targetImg.classList.contains('dropped-image')) {
+                targetImg.style.left = `${event.pageX - targetImg.width / 2}px`;
+                targetImg.style.top = `${event.pageY - targetImg.height / 2}px`;
+            } else {
+                // Otherwise, create a new clone of the image and set it up for dragging/dropping
+                const droppedImg = targetImg.cloneNode();
+                droppedImg.classList.add('dropped-image');
+                droppedImg.style.position = "absolute";
+
+                // Set position based on mouse location
+                droppedImg.style.left = `${event.pageX - targetImg.width / 2}px`;
+                droppedImg.style.top = `${event.pageY - targetImg.height / 2}px`;
+
+                // Set a custom data-id for tracking
+                droppedImg.setAttribute('data-id', imgId);
+                droppedImg.setAttribute('draggable', 'true');
+
+                // Attach dragstart to make it draggable again
+                droppedImg.addEventListener('dragstart', (dragEvent) => {
+                    dragEvent.dataTransfer.setData("text/plain", imgId);
+                });
+
+                // Remove the original image from the stack
+                targetImg.remove();
+
+                // Append the dropped image to the body
+                document.body.appendChild(droppedImg);
+            }
+        });
+    </script>
+</body>
+</html>
